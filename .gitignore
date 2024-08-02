@@ -1,0 +1,6 @@
+# Cache
+/.cache
+/.direnv
+
+# Builds
+/build

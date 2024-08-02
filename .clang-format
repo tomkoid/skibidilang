@@ -1,0 +1,8 @@
+﻿---
+BasedOnStyle: Chromium
+IndentWidth: '2'
+Language: Cpp
+PointerAlignment: Right
+TabWidth: '2'
+
+...
