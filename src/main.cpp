@@ -1,5 +1,7 @@
 #include <cctype>
 #include <cstdlib>
+#include <filesystem>
+#include <format>
 #include <fstream>
 #include <iostream>
 #include <optional>
@@ -64,6 +66,52 @@ std::vector<Token> tokenize(const std::string &contents) {
   return tokens;
 }
 
+std::string tokens_to_asm(const std::vector<Token> &tokens) {
+  std::stringstream output;
+  output << "global _start\n_start:\n";
+  for (unsigned long i = 0; i < tokens.size(); i++) {
+    const Token &token = tokens.at(i);
+    if (token.type == TokenType::_return) {
+      if (i + 1 < tokens.size() &&
+          tokens.at(i + 1).type == TokenType::int_lit) {
+        if (i + 2 < tokens.size() && tokens.at(i + 2).type == TokenType::semi) {
+          output << "    mov rax, 60\n";
+          output << "    mov rdi, " << tokens.at(i + 1).value.value() << "\n";
+          output << "    syscall";
+        }
+      }
+    }
+  }
+  return output.str();
+}
+
+void make_executable(const std::string &build_dir) {
+  int code;
+  try {
+    // compile asm
+    code = std::system(std::format("nasm -f elf64 -o {}/output.o {}/output.asm",
+                                   build_dir, build_dir)
+                           .c_str());
+
+    if (code != 0) {
+      std::cerr << "ERROR: nasm failed" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    // link
+    code =
+        std::system(std::format("ld -o output {}/output.o", build_dir).c_str());
+
+    if (code != 0) {
+      std::cerr << "ERROR: ld failed" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+  } catch (std::exception &e) {
+    std::cerr << "ERROR: " << e.what() << std::endl;
+    exit(EXIT_FAILURE);
+  }
+}
+
 int main(int argc, char *argv[]) {
   if (argc != 2) {
     std::cerr << "Usage: " << argv[0] << " <file>" << std::endl;
@@ -88,6 +136,22 @@ int main(int argc, char *argv[]) {
   for (auto token : tokens) {
     std::cout << ": " << token.value.value_or("") << std::endl;
   }
+
+  // make asm build folder if it doesnt exist
+  std::string build_dir = ".skibidi";
+  if (!std::filesystem::exists(build_dir)) {
+    std::filesystem::create_directory(build_dir);
+  }
+
+  std::string asm_code = tokens_to_asm(tokens);
+  {
+    std::fstream file(std::format("{}/output.asm", build_dir), std::ios::out);
+    file << asm_code;
+  }
+
+  make_executable(build_dir);
+
+  /*std::cout << asm_code << std::endl;*/
 
   return 0;
 }
