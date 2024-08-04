@@ -1,3 +1,3 @@
 # skbidilang
 
-Compiler written in C++ for SkibidiLang
+Compiler written in Rust for SkibidiLang
