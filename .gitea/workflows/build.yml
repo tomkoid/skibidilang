@@ -1,0 +1,27 @@
+name: Build compiler 
+run-name: ${{ gitea.actor }} is testing out Gitea Actions 🚀
+on: [push]
+
+jobs:
+  build:
+    runs-on: docker
+    container:
+      image: rust:latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Check code 
+        run: |
+          cargo check
+          cargo test
+      - name: Publish release  
+        uses: https://gitea.com/akkuman/gitea-release-action@v1
+        with:
+          files: |-
+            target/release/skibidilang
+          name: 'ci build'
+          tag_name: 'cibuild'
+          token: '${{secrets.RELEASE_TOKEN}}'
+          api_key: '${{secrets.RELEASE_TOKEN}}'
+
+      - run: echo "🍏 This job's status is ${{ job.status }}."
