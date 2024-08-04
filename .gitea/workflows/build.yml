@@ -6,8 +6,11 @@ jobs:
   build:
     runs-on: docker
     container:
-      image: rust:latest
+      image: rust:bookworm
     steps:
+      - name: Install node for checkout
+        run: |
+          apt-get install -y nodejs npm
       - name: Check out repository code
         uses: actions/checkout@v4
       - name: Check code 
