@@ -6,23 +6,28 @@ jobs:
   build:
     runs-on: docker
     container:
-      image: rust:bookworm
+      image: rust:alpine
     steps:
       - name: Install node for checkout
         run: |
-          apt update -y
-          apt-get install -y nodejs npm
+          apk add nodejs npm
       - name: Check out repository code
         uses: actions/checkout@v4
       - name: Check code 
         run: |
           cargo check
           cargo test
+      - name: Build code 
+        run: |
+          cargo build --release 
+      - name: Rename files
+        run: |
+          mv ./target/release/skibidilang ./skibidilang-arm64
       - name: Publish release  
         uses: https://gitea.com/akkuman/gitea-release-action@v1
         with:
           files: |-
-            target/release/skibidilang
+            skibidilang-arm64
           name: 'ci build'
           tag_name: 'cibuild'
           token: '${{secrets.RELEASE_TOKEN}}'
