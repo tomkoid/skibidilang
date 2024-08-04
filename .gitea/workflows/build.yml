@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Install node for checkout
         run: |
-          apk add nodejs npm
+          apk add nodejs npm git
       - name: Check out repository code
         uses: actions/checkout@v4
       - name: Check code 
