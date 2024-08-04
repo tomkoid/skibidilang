@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum TokenKind {
     Return,
     Int,
@@ -71,7 +71,7 @@ pub fn lex(contents: &str) -> Vec<Token> {
 
             buf.clear();
         } else {
-            eprintln!("Unexpected token: {} at index {}", c, i);
+            //eprintln!("Unexpected token: {} at index {}", c, i);
             buf.clear();
             //std::process::exit(1);
         }
