@@ -6,3 +6,8 @@
 /build
 /.skibidi
 /output
+
+
+# Added by cargo
+
+/target
