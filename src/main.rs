@@ -12,6 +12,11 @@ const BUILD_DIR: &str = ".skibidi";
 fn main() {
     let args = Args::parse();
 
+    if !std::path::Path::new(&args.file).exists() {
+        eprintln!("File not found: {}", args.file);
+        std::process::exit(1);
+    }
+
     // read file from args
     let file = std::fs::read_to_string(&args.file).expect("Failed to read file");
 
