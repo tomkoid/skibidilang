@@ -1,5 +1,6 @@
 use crate::{
     lexer::{Token, TokenKind},
+    loader::Loader,
     BUILD_DIR,
 };
 
@@ -17,7 +18,7 @@ pub fn tokens_to_asm(tokens: &Vec<Token>) -> String {
                             "    mov rdi, {}\n",
                             tokens[i + 1].value.clone().unwrap()
                         ));
-                        output.push_str("    syscall");
+                        output.push_str("    syscall\n");
                     }
                 }
             }
@@ -39,7 +40,7 @@ pub fn create_build_dir(build_dir: &str) -> Result<(), std::io::Error> {
 }
 
 pub fn make_executable(asm_output: &str, file: &str) {
-    println!("Assembling code...");
+    let mut l = Loader::new("Assembling code...".to_string());
 
     // write asm to file
     std::fs::write(format!("{}/output.s", BUILD_DIR), asm_output).expect("Failed to write file");
@@ -53,11 +54,13 @@ pub fn make_executable(asm_output: &str, file: &str) {
         .expect("Failed to execute nasm");
 
     if output.status.success() {
-        println!("Assembled code successfully.");
+        l.stop_success();
     } else {
-        println!("Failed to assemble {}", file);
+        l.stop_error_msg("Failed to assemble code.".to_string());
         std::process::exit(1);
     }
+
+    let mut l = Loader::new("Linking code...".to_string());
 
     let output = std::process::Command::new("ld")
         .arg("-o")
@@ -67,9 +70,9 @@ pub fn make_executable(asm_output: &str, file: &str) {
         .expect("Failed to execute ld");
 
     if output.status.success() {
-        println!("Linked code successfully.");
+        l.stop_success();
     } else {
-        println!("Failed to link {}", file);
+        l.stop_error_msg("Failed to link code.".to_string());
         std::process::exit(1);
     }
 

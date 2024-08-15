@@ -1,9 +1,11 @@
 use args::Args;
 use clap::Parser;
+use loader::Loader;
 
 mod args;
 mod asm;
 mod lexer;
+mod loader;
 
 const BUILD_DIR: &str = ".skibidi";
 
@@ -12,7 +14,10 @@ fn main() {
 
     // read file from args
     let file = std::fs::read_to_string(&args.file).expect("Failed to read file");
+
+    let mut l = Loader::new(format!("Lexing {}...", args.file));
     let tokens = lexer::lex(&file);
+    l.stop_success();
 
     if args.debug {
         for token in &tokens {
